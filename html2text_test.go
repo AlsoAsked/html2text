@@ -22,6 +22,8 @@ func TestHTML2Text(t *testing.T) {
 		{"8", args{"<div> <div> some text</div> <div> another text </div> </div>"}, " some text another text "},
 		{"9", args{"<div> <div>some &amp; text</div> <div>another text</div> </div>"}, "some & text another text"},
 		{"10", args{"<div> <p>some &lt;&gt; text</p> <div>another text</div> </div>"}, "some <> text\nanother text"},
+		{"11", args{"<ul><li>one</li><li>two</li><li>three</li></ul>"}, "• one\n• two\n• three\n"},
+		{"12", args{"<ol><li>one</li><li>two</li><li>three</li></ol>"}, "1. one\n2. two\n3. three\n"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

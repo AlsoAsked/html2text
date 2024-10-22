@@ -1,6 +1,7 @@
 package html2text
 
 import (
+	"fmt"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -23,6 +24,10 @@ func HTML2Text(htmlString string) string {
 		wasSpace = false
 		// unwanted tags counter
 		skipTags = 0
+		// determines if the list is ordered
+		isOrderedList = false
+		// the index of the last ordered list item
+		orderedListIndex = 0
 	)
 
 	// use tokenizer, not parser, because it faster, and we do not need html tree
@@ -77,8 +82,18 @@ func HTML2Text(htmlString string) string {
 		// add new line instead of some tags
 		case html.StartTagToken:
 			switch tokenizer.Token().DataAtom {
-			case atom.Br, atom.Li:
+			case atom.Br:
 				writeNewLine()
+			case atom.Li:
+				writeNewLineConditional()
+				if isOrderedList {
+					orderedListIndex++
+					writeString(fmt.Sprintf("%d. ", orderedListIndex))
+				} else {
+					writeString("• ")
+				}
+			case atom.Ol:
+				isOrderedList = true
 			case atom.P, atom.H1, atom.H2, atom.H3, atom.H4, atom.H5, atom.H6:
 				writeNewLineConditional()
 			case atom.Noscript:
@@ -98,6 +113,10 @@ func HTML2Text(htmlString string) string {
 			switch tokenizer.Token().DataAtom {
 			case atom.Ul:
 				writeNewLine()
+			case atom.Ol:
+				writeNewLine()
+				orderedListIndex = 0
+				isOrderedList = false
 			case atom.P, atom.H1, atom.H2, atom.H3, atom.H4, atom.H5, atom.H6:
 				writeNewLineConditional()
 			// end of unwanted tags
